@@ -22,13 +22,14 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
 # Runtime stage
 FROM alpine:latest
 
-# Install Trivy and required tools
-RUN apk add --no-cache \
+# Install runtime dependencies
+RUN apk --no-cache add \
     ca-certificates \
-    curl \
-    && curl -sfL https://github.com/aquasecurity/trivy/releases/latest/download/trivy_$(uname -s)_$(uname -m).tar.gz | tar -xz -C /usr/local/bin trivy \
-    && chmod +x /usr/local/bin/trivy \
-    && rm -rf /var/cache/apk/*
+    curl
+
+# Install Trivy using the official install script
+# This method is more reliable than downloading tar.gz directly
+RUN curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
 
 # Create non-root user
 RUN addgroup -S exploint && adduser -S exploint -G exploint
