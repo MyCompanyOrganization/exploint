@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Build artifacts (root level)
+exploint
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Cache and temporary files
+.cache/
+tmp/
+temp/
+*.log
+
+# Environment files
+.env
+.env.local
+
+# Docker (but keep docker/ directory structure)
+docker/*.md
+docker/.dockerignore
+
