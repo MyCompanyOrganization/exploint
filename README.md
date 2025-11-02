@@ -129,6 +129,27 @@ exploint/
     └── Dockerfile
 ```
 
+## Exploint MCP Server
+
+Exploint includes an MCP (Model Context Protocol) server that allows you to use Exploint directly from Cursor IDE with Cursor's built-in LLM capabilities.
+
+See [Exploint-mcp/README.md](Exploint-mcp/README.md) for installation and configuration instructions.
+
+### Quick Start
+
+1. Build the MCP server:
+   ```bash
+   cd cmd/exploint-mcp
+   go build -o exploint-mcp main.go
+   ```
+
+2. Configure in Cursor IDE using the example config in `Exploint-mcp/cursor-mcp-config.json`
+
+3. Use Exploint tools in Cursor:
+   ```
+   @exploint analyze_repository path=/path/to/repo
+   ```
+
 ## License
 
 [License TBD]
