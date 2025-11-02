@@ -123,25 +123,50 @@ func (r *MarkdownReporter) writeDetailedFindings(file *os.File) {
 
 // writeFinding writes a single finding
 func (r *MarkdownReporter) writeFinding(file *os.File, finding *models.Finding, index int) {
-	fmt.Fprintf(file, "### %d. %s\n\n", index, finding.Vulnerability.ID)
+	// Handle nil Vulnerability
+	vulnID := "Unknown"
+	vulnTitle := ""
+	vulnSeverity := ""
+	vulnCVSSScore := 0.0
+	vulnDescription := ""
+	vulnAttackVectors := []string{}
+	vulnExploitPrerequisites := []string{}
 	
-	if finding.Vulnerability.Title != "" {
-		fmt.Fprintf(file, "**Title:** %s\n\n", finding.Vulnerability.Title)
+	if finding.Vulnerability != nil {
+		vulnID = finding.Vulnerability.ID
+		vulnTitle = finding.Vulnerability.Title
+		vulnSeverity = finding.Vulnerability.Severity
+		vulnCVSSScore = finding.Vulnerability.CVSSScore
+		vulnDescription = finding.Vulnerability.Description
+		vulnAttackVectors = finding.Vulnerability.AttackVectors
+		vulnExploitPrerequisites = finding.Vulnerability.ExploitPrerequisites
 	}
 	
-	fmt.Fprintf(file, "**Component:** %s@%s\n\n", finding.Component.Name, finding.Component.Version)
+	fmt.Fprintf(file, "### %d. %s\n\n", index, vulnID)
+	
+	if vulnTitle != "" {
+		fmt.Fprintf(file, "**Title:** %s\n\n", vulnTitle)
+	}
+	
+	// Handle nil Component
+	if finding.Component != nil {
+		fmt.Fprintf(file, "**Component:** %s@%s\n\n", finding.Component.Name, finding.Component.Version)
+	} else {
+		fmt.Fprintf(file, "**Component:** Not Found\n\n")
+	}
+	
 	fmt.Fprintf(file, "**Exploitability Score:** `%s`\n\n", finding.Score)
 	
-	if finding.Vulnerability.Severity != "" {
-		fmt.Fprintf(file, "**Severity:** %s\n\n", finding.Vulnerability.Severity)
+	if vulnSeverity != "" {
+		fmt.Fprintf(file, "**Severity:** %s\n\n", vulnSeverity)
 	}
 	
-	if finding.Vulnerability.CVSSScore > 0 {
-		fmt.Fprintf(file, "**CVSS Score:** %.1f\n\n", finding.Vulnerability.CVSSScore)
+	if vulnCVSSScore > 0 {
+		fmt.Fprintf(file, "**CVSS Score:** %.1f\n\n", vulnCVSSScore)
 	}
 	
-	if finding.Vulnerability.Description != "" {
-		fmt.Fprintf(file, "**Description:**\n\n%s\n\n", finding.Vulnerability.Description)
+	if vulnDescription != "" {
+		fmt.Fprintf(file, "**Description:**\n\n%s\n\n", vulnDescription)
 	}
 	
 	fmt.Fprintf(file, "**Assessment:**\n\n%s\n\n", finding.Assessment)
@@ -161,17 +186,17 @@ func (r *MarkdownReporter) writeFinding(file *os.File, finding *models.Finding, 
 		fmt.Fprintf(file, "**Recommendation:**\n\n%s\n\n", finding.Recommendation)
 	}
 	
-	if len(finding.Vulnerability.AttackVectors) > 0 {
+	if len(vulnAttackVectors) > 0 {
 		fmt.Fprintf(file, "**Attack Vectors:**\n\n")
-		for _, vector := range finding.Vulnerability.AttackVectors {
+		for _, vector := range vulnAttackVectors {
 			fmt.Fprintf(file, "- %s\n", vector)
 		}
 		fmt.Fprintf(file, "\n")
 	}
 	
-	if len(finding.Vulnerability.ExploitPrerequisites) > 0 {
+	if len(vulnExploitPrerequisites) > 0 {
 		fmt.Fprintf(file, "**Exploitation Prerequisites:**\n\n")
-		for _, prereq := range finding.Vulnerability.ExploitPrerequisites {
+		for _, prereq := range vulnExploitPrerequisites {
 			fmt.Fprintf(file, "- %s\n", prereq)
 		}
 		fmt.Fprintf(file, "\n")

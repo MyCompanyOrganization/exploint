@@ -120,9 +120,20 @@ func (v *VEXGenerator) Generate(outputPath string) error {
 
 // findingToVEX converts a finding to a VEX vulnerability
 func (v *VEXGenerator) findingToVEX(finding *models.Finding) VEXVulnerability {
+	// Handle nil Vulnerability
+	vulnID := "Unknown"
+	vulnDescription := ""
+	vulnCVSSScore := 0.0
+	
+	if finding.Vulnerability != nil {
+		vulnID = finding.Vulnerability.ID
+		vulnDescription = finding.Vulnerability.Description
+		vulnCVSSScore = finding.Vulnerability.CVSSScore
+	}
+	
 	vuln := VEXVulnerability{
-		ID:          finding.Vulnerability.ID,
-		Description: finding.Vulnerability.Description,
+		ID:          vulnID,
+		Description: vulnDescription,
 		Recommendation: finding.Recommendation,
 	}
 	
@@ -151,11 +162,17 @@ func (v *VEXGenerator) findingToVEX(finding *models.Finding) VEXVulnerability {
 		justification = "Assessment in progress"
 	}
 	
-	// Create affected component
-	purl := finding.Component.PURL
-	if purl == "" {
-		// Generate PURL if not present
-		purl = fmt.Sprintf("pkg:%s/%s@%s", finding.Component.Type, finding.Component.Name, finding.Component.Version)
+	// Create affected component - handle nil Component
+	var purl string
+	if finding.Component != nil {
+		purl = finding.Component.PURL
+		if purl == "" {
+			// Generate PURL if not present
+			purl = fmt.Sprintf("pkg:%s/%s@%s", finding.Component.Type, finding.Component.Name, finding.Component.Version)
+		}
+	} else {
+		// Component not found - use a placeholder
+		purl = "pkg:unknown/component@unknown"
 	}
 	
 	vuln.Affects = []VEXAffect{
@@ -171,9 +188,9 @@ func (v *VEXGenerator) findingToVEX(finding *models.Finding) VEXVulnerability {
 	}
 	
 	// Add ratings
-	if finding.Vulnerability.CVSSScore > 0 {
+	if vulnCVSSScore > 0 {
 		severity := v.scoreToSeverity(finding.Score)
-		score := finding.Vulnerability.CVSSScore
+		score := vulnCVSSScore
 		rating := VEXRating{
 			Score:    &score,
 			Severity: severity,

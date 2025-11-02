@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "exploint": {
+      "command": "exploint-mcp",
+      "args": [],
+      "env": {
+        "MCP_SERVER": "1"
+      }
+    }
+  }
+}
+

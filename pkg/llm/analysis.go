@@ -21,6 +21,17 @@ func NewAnalyzer(provider Provider) *Analyzer {
 
 // AnalyzeExploitability analyzes exploitability with code context
 func (a *Analyzer) AnalyzeExploitability(ctx context.Context, finding *models.Finding, codeContext string) (string, error) {
+	// Handle nil Component
+	compName := "Unknown"
+	compVersion := "Unknown"
+	compLocation := "Unknown"
+	
+	if finding.Component != nil {
+		compName = finding.Component.Name
+		compVersion = finding.Component.Version
+		compLocation = finding.Component.Location
+	}
+	
 	// Build context string
 	context := fmt.Sprintf(`Component: %s (version: %s)
 Location: %s
@@ -29,10 +40,15 @@ In Execution Path: %v
 Platform Compatible: %v
 
 Code Context:
-%s`, finding.Component.Name, finding.Component.Version,
-		finding.Component.Location, finding.ComponentPresent,
+%s`, compName, compVersion,
+		compLocation, finding.ComponentPresent,
 		finding.InExecutionPath, finding.PlatformCompatible,
 		codeContext)
+
+	// Handle nil Vulnerability
+	if finding.Vulnerability == nil {
+		return "", fmt.Errorf("vulnerability is nil, cannot analyze")
+	}
 
 	insights, err := a.provider.AnalyzeContext(ctx, finding.Vulnerability, context)
 	if err != nil {

@@ -26,9 +26,18 @@ func GetLLMConfig(provider, apiKey string) (*LLMProviderConfig, error) {
 
 	if cfg.Provider == "" {
 		cfg.Provider = os.Getenv("EXPLOINT_LLM_PROVIDER")
+		// Auto-detect Cursor mode if in MCP context
+		if cfg.Provider == "" && os.Getenv("MCP_SERVER") != "" {
+			cfg.Provider = "cursor"
+		}
 		if cfg.Provider == "" {
 			cfg.Provider = "openai" // Default
 		}
+	}
+
+	// Cursor provider doesn't need API key
+	if cfg.Provider == "cursor" {
+		return cfg, nil
 	}
 
 	if cfg.APIKey == "" {
